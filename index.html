@@ -1,0 +1,474 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Transporte de mercancía con GPS a toda la República | TransReynosa (propuesta)</title>
+<meta name="description" content="Logística terrestre con rastreo satelital: unidades desde 600 kg hasta cajas secas, acceso a las principales aduanas del país y atención 24/7.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:wght@500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Idea: un tablero de salidas, como en una central, con las aduanas a las que llegan */
+:root{
+  --red:#C23A22;        /* rojo naranja del mapa del logo, oscurecido para texto */
+  --red-hi:#E0482A;     /* tono original del logo, solo decorativo */
+  --red-dark:#9E2E1A;
+  --ink:#16181D;
+  --board:#1B1E24;
+  --slate:#F2F3F5;
+  --white:#FFFFFF;
+  --text:#1A1C21;
+  --muted:#555A64;
+  --line:#DCDFE4;
+  --amber:#FFB547;      /* letras del tablero */
+  --r:10px;
+  --display:"Big Shoulders Display","Arial Narrow",sans-serif;
+  --body:"Figtree",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{scroll-behavior:smooth;scroll-padding-top:80px}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
+body{margin:0;background:var(--white);color:var(--text);font-family:var(--body);font-size:17px;line-height:1.55}
+img{max-width:100%;display:block}
+a{color:var(--red)}
+:focus-visible{outline:3px solid var(--amber);outline-offset:2px}
+h1,h2,h3{font-family:var(--display);line-height:.98;margin:0;text-wrap:balance;text-transform:none}
+p{margin:0}
+.wrap{max-width:1180px;margin:0 auto;padding-left:16px;padding-right:16px}
+
+.proposal{background:var(--ink);color:#fff;font-size:14px}
+.proposal .wrap{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding-top:8px;padding-bottom:8px}
+.proposal button{background:var(--amber);color:var(--ink);border:0;border-radius:6px;padding:6px 12px;font:inherit;font-weight:600;cursor:pointer}
+
+header.top{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.97);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;gap:18px;min-height:72px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--text);flex:none}
+.brand img{width:48px;height:48px}
+.brand b{font-family:var(--display);font-weight:800;font-size:26px;line-height:1;display:block}
+.brand small{font-size:13px;color:var(--muted)}
+nav.main{display:flex;gap:2px;margin-left:auto}
+nav.main a{text-decoration:none;color:var(--text);font-weight:500;padding:8px 10px;border-radius:6px}
+nav.main a:hover{background:var(--slate)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:10px 20px;border-radius:var(--r);font:inherit;font-weight:600;text-decoration:none;border:2px solid transparent;cursor:pointer;line-height:1.2;text-align:center}
+.btn-red{background:var(--red);color:#fff}
+.btn-red:hover{background:var(--red-dark)}
+.btn-light{border-color:#fff;color:#fff}
+.btn-light:hover{background:#fff;color:var(--ink)}
+.btn-dark{border-color:var(--text);color:var(--text)}
+.btn-dark:hover{background:var(--text);color:#fff}
+.call-top{flex:none}
+
+/* Portada */
+.hero{position:relative;color:#fff;background:var(--ink) url("https://transreynosa.com/img/img-1.jpg") center/cover no-repeat}
+.hero::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(14,15,19,.92) 0%,rgba(14,15,19,.75) 50%,rgba(14,15,19,.35) 100%)}
+.hero .wrap{position:relative;padding-top:84px;padding-bottom:80px;display:grid;gap:22px}
+.hero h1{font-size:clamp(46px,7.4vw,96px);font-weight:900;max-width:13ch;letter-spacing:.005em}
+.hero p.lead{font-size:19px;color:#E1E3E8;max-width:34em}
+.hero .ctas{display:flex;gap:10px;flex-wrap:wrap}
+.facts{background:var(--red);color:#fff}
+.facts .wrap{display:grid;grid-template-columns:repeat(3,1fr)}
+.facts div{padding:18px 20px 18px 0;display:flex;align-items:center;gap:12px;font-weight:600}
+.facts div + div{padding-left:20px;border-left:1px solid rgba(255,255,255,.35)}
+.facts svg{flex:none}
+
+section.block{padding:72px 0}
+section.alt{background:var(--slate)}
+.sec-head{display:grid;gap:10px;margin-bottom:32px;max-width:700px}
+.sec-head h2{font-size:clamp(38px,5vw,60px);font-weight:900}
+.sec-head p{color:var(--muted);font-size:18px}
+
+/* Flota */
+.fleet{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center}
+.fleet img{width:100%}
+.range{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;margin:20px 0 8px;font-family:var(--display);font-weight:800;font-size:30px}
+.range i{height:6px;border-radius:3px;background:linear-gradient(90deg,var(--red-hi),var(--red-dark))}
+.fleet ul{margin:16px 0 0;padding-left:20px;color:var(--muted);display:grid;gap:6px}
+
+/* Logística: pasos reales de su operación */
+.steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:16px;counter-reset:s}
+.steps li{background:var(--white);border:1px solid var(--line);border-radius:var(--r);padding:22px;counter-increment:s;display:grid;gap:8px;align-content:start}
+.steps li::before{content:counter(s);font-family:var(--display);font-weight:900;font-size:44px;line-height:1;color:var(--red)}
+.steps h3{font-size:28px;font-weight:800}
+.steps p{color:var(--muted);font-size:16px}
+
+/* Tablero de aduanas */
+.board{background:var(--board);color:#fff;border-radius:var(--r);overflow:hidden}
+.board-head{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:18px 22px;border-bottom:1px solid #2E323A;font-size:14px;color:#AEB3BD}
+.board-head b{font-family:var(--display);font-size:26px;color:#fff;font-weight:800}
+.board table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.board th{text-align:left;font-size:13px;font-weight:600;color:#AEB3BD;padding:10px 22px;border-bottom:1px solid #2E323A}
+.board td{padding:14px 22px;border-bottom:1px solid #2A2D34;font-size:15px;color:#D5D8DE}
+.board tr:last-child td{border-bottom:0}
+.board td.dest{font-family:var(--display);font-weight:800;font-size:28px;color:var(--amber);letter-spacing:.04em;text-transform:uppercase}
+.board .ok{display:inline-flex;align-items:center;gap:8px;color:#9EE6A8;font-weight:600}
+.board .ok::before{content:"";width:8px;height:8px;border-radius:50%;background:#5BD16B}
+.boardwrap{overflow-x:auto}
+.cover-note{margin-top:16px;color:var(--muted);font-size:16px}
+
+/* Servicios adicionales */
+.extra{display:grid;grid-template-columns:.9fr 1.1fr;gap:40px;align-items:center}
+.extra img{width:100%;max-width:440px}
+.extra .text{display:grid;gap:14px}
+.extra .text p{color:var(--muted)}
+
+/* Cotizar */
+.quote{display:grid;grid-template-columns:.8fr 1.2fr;gap:40px;align-items:start}
+.quote .side{display:grid;gap:18px}
+.quote .side ul{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+.quote .side li b{display:block;font-size:14px;color:var(--muted);font-weight:500}
+.quote .side a{font-family:var(--display);font-weight:800;font-size:28px;text-decoration:none;color:var(--text);overflow-wrap:anywhere}
+.quote .side .agent{display:flex;gap:14px;align-items:center;background:var(--white);border:1px solid var(--line);border-radius:var(--r);padding:12px}
+.quote .side .agent img{width:64px;height:64px;border-radius:50%;object-fit:cover;flex:none}
+.quote .side .agent p{font-size:15px;color:var(--muted)}
+.quote .side .agent strong{color:var(--text);display:block}
+form.qf{background:var(--white);border:1px solid var(--line);border-radius:var(--r);padding:24px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.qf .full{grid-column:1/-1}
+.qf label{display:block;font-weight:600;font-size:15px;margin-bottom:6px}
+.qf input,.qf select,.qf textarea{width:100%;font:inherit;font-size:16px;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--white);color:var(--text)}
+.qf .note{font-size:14px;color:var(--muted);margin-top:8px}
+.qf .err{color:var(--red);font-size:14px;margin-top:6px}
+
+footer{background:var(--ink);color:#B9BDC6;padding:40px 0;font-size:15px}
+footer .wrap{display:grid;grid-template-columns:2fr 1fr 1fr;gap:24px}
+footer b{font-family:var(--display);color:#fff;font-size:28px;display:block;margin-bottom:6px}
+footer a{color:#fff;overflow-wrap:anywhere}
+footer ul{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+
+dialog{border:0;padding:0;border-radius:var(--r);width:min(580px,calc(100vw - 32px));max-height:calc(100vh - 32px);color:var(--text)}
+dialog::backdrop{background:rgba(14,15,19,.6)}
+.dh{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--white)}
+.dh h2{font-size:32px}
+.x{background:none;border:0;font-size:28px;line-height:1;cursor:pointer;width:44px;height:44px;color:var(--text)}
+.db{padding:16px 20px 22px}
+.db ol{margin:0;padding-left:20px;display:grid;gap:12px}
+.db b{display:block}
+.db span{color:var(--muted);font-size:15px}
+
+@media (max-width:1000px){
+  nav.main{display:none}
+  .call-top{margin-left:auto}
+  .steps{grid-template-columns:1fr}
+}
+@media (max-width:760px){
+  .hero .wrap{padding-top:56px;padding-bottom:56px}
+  .hero::before{background:rgba(14,15,19,.8)}
+  .facts .wrap{grid-template-columns:1fr}
+  .facts div,.facts div + div{padding:12px 0;border-left:0}
+  .facts div + div{border-top:1px solid rgba(255,255,255,.35)}
+  .fleet,.extra,.quote{grid-template-columns:1fr}
+  section.block{padding:52px 0}
+  form.qf{grid-template-columns:1fr;padding:18px}
+  footer .wrap{grid-template-columns:1fr}
+  .board td,.board th{padding-left:14px;padding-right:14px}
+  .board td.dest{font-size:22px}
+}
+@media (max-width:520px){
+  .brand small{display:none}
+  .brand img{width:40px;height:40px}
+  .brand b{font-size:22px}
+  .call-top span{display:none}
+  .call-top{padding:10px 12px}
+  .board .hide-s{display:none}
+}
+</style>
+<style id="refero-theme">
+/* fonts: family=IBM+Plex+Serif:wght@500;600&family=Inter:wght@400;500;600 */
+/* Estilo Refero: Railway, "cosmic midnight express". Espacio casi negro, titulares serif, UI en Inter, profundidad con superficies y bordes de 1px, un solo acento (el rojo naranja de la marca, en tono sereno) para la acción principal. */
+:root{
+  --red:#C9472B; --red-hi:#E0482A; --red-dark:#A9391F;
+  --ink:#13111C; --board:#1A191F; --slate:#1A191F; --white:#13111C;
+  --text:#F7F7F8; --muted:#A1A0AB; --line:#33323E; --amber:#FFB547; --r:12px;
+  --display:"IBM Plex Serif",Georgia,serif; --body:"Inter",system-ui,sans-serif;
+}
+body{background:#13111C;color:#F7F7F8}
+h1,h2,h3{font-family:var(--display);font-weight:500!important;letter-spacing:-.01em;color:#F7F7F8;line-height:1.08}
+header.top{background:rgba(19,17,28,.94);border-bottom-color:var(--line)}
+.brand{color:#F7F7F8}
+.brand b{font-family:var(--display);font-weight:600}
+.brand small{color:var(--muted)}
+.brand img{background:#fff;border-radius:8px;padding:2px}
+nav.main a{color:#D0CFD2}
+nav.main a:hover{background:#1A191F}
+.btn{border-radius:8px;font-weight:500}
+.btn-red{background:var(--red)}
+.btn-dark{border-color:#F7F7F8;color:#F7F7F8}
+.btn-dark:hover{background:#F7F7F8;color:#13111C}
+.hero::before{background:linear-gradient(180deg,rgba(19,17,28,.55) 0%,rgba(19,17,28,.85) 70%,#13111C 100%)}
+.hero h1{font-size:clamp(40px,6vw,74px)!important}
+.facts{background:#1A191F;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.facts div + div{border-left-color:var(--line)}
+.facts div + div{border-top-color:var(--line)}
+section.block{padding:96px 0}
+section.alt{background:#0D0C14}
+.sec-head p,.fleet ul,.steps p,.extra .text p,.cover-note,.quote .side li b,.quote .side .agent p{color:var(--muted)}
+.fleet img,.extra img{background:#F7F7F8;border-radius:12px;padding:12px}
+.range span{color:#F7F7F8}
+.steps li{background:#1A191F;border-color:var(--line);border-radius:12px;box-shadow:inset 0 1px 0 rgba(255,255,255,.06)}
+.steps li::before{color:var(--amber)}
+.board{border:1px solid var(--line);border-radius:12px;background:#0D0C14}
+.quote .side a{color:#F7F7F8}
+.quote .side .agent{background:#1A191F;border-color:var(--line)}
+.quote .side .agent strong{color:#F7F7F8}
+form.qf{background:#1A191F;border-color:var(--line);border-radius:12px}
+.qf label{color:#D0CFD2}
+.qf input,.qf select,.qf textarea{background:#0D0C14;border-color:var(--line);color:#F7F7F8;border-radius:6px}
+.qf .note{color:var(--muted)}
+.qf .err{color:#FF9B85}
+footer{background:#0D0C14;border-top:1px solid var(--line)}
+footer b{font-family:var(--display)}
+dialog{background:#1A191F;color:#F7F7F8}
+.dh{background:#1A191F;border-bottom-color:var(--line)}
+.dh h2{color:#F7F7F8}
+.x{color:#F7F7F8}
+.db span{color:var(--muted)}
+a{color:#FF9B85}
+.btn-dark{background:transparent}
+@media (max-width:380px){
+  .brand b{font-size:17px}
+  .brand img{width:34px;height:34px}
+  .top .wrap{gap:10px}
+}
+</style>
+</head>
+<body>
+
+<div class="proposal" role="note">
+  <div class="wrap">
+    <span>Vista previa de rediseño propuesta para TransReynosa. No es el sitio oficial.</span>
+    <button type="button" id="openChanges">Ver qué mejoramos</button>
+  </div>
+</div>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#inicio">
+      <img src="https://transreynosa.com/img/logo.png" alt="" width="48" height="48">
+      <span><b>Transportes Reynosa</b><small>Logística terrestre</small></span>
+    </a>
+    <nav class="main" aria-label="Principal">
+      <a href="#flota">Flota</a>
+      <a href="#cobertura">Cobertura</a>
+      <a href="#servicios">Servicios</a>
+      <a href="#cotizar">Cotizar</a>
+    </nav>
+    <a class="btn btn-red call-top" href="tel:+525544521839" aria-label="Llamar al 55 4452 1839">
+      <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1z"/></svg>
+      <span>55 4452 1839</span>
+    </a>
+  </div>
+</header>
+
+<main id="inicio">
+<section class="hero">
+  <div class="wrap">
+    <h1>Tu mercancía a cualquier punto de la República</h1>
+    <p class="lead">Logística terrestre con rastreo satelital en todas las unidades, estatus en tiempo real y acceso a las principales aduanas del país.</p>
+    <div class="ctas">
+      <a class="btn btn-red" href="#cotizar">Cotizar un envío</a>
+      <a class="btn btn-light" href="#cobertura">Ver cobertura</a>
+    </div>
+  </div>
+</section>
+<div class="facts">
+  <div class="wrap">
+    <div><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm-1 14.6-4.3-4.3 1.4-1.4 2.9 2.9 6-6 1.4 1.4z"/></svg>Empresa 100% mexicana</div>
+    <div><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2C8 2 5 5 5 9c0 5.2 7 13 7 13s7-7.8 7-13c0-4-3-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>GPS en todas las unidades</div>
+    <div><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 10.4 3.5 2.1-.8 1.3L11 13V7h2z"/></svg>Atención al cliente 24/7</div>
+  </div>
+</div>
+
+<section class="block" id="flota">
+  <div class="wrap fleet">
+    <img src="https://transreynosa.com/img/flota.png" alt="Flota de TransReynosa: camionetas, vans y camiones de caja" loading="lazy">
+    <div>
+      <div class="sec-head" style="margin-bottom:0">
+        <h2>Una unidad para cada carga</h2>
+        <p>Nuestra flota tiene vehículos de distintas capacidades, todos con rastreo satelital.</p>
+      </div>
+      <div class="range" aria-label="De 600 kilos a caja seca"><span>600 kg</span><i aria-hidden="true"></i><span>Caja seca</span></div>
+      <ul>
+        <li>Monitoreo GPS de punto a punto</li>
+        <li>Personal capacitado que da seguimiento a cada envío</li>
+        <li>Experiencia en el manejo de cargas</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="block alt" id="servicios">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>Cómo movemos tu mercancía</h2>
+      <p>Seguimiento desde la recolección hasta la entrega final.</p>
+    </div>
+    <ol class="steps">
+      <li><h3>Recolección</h3><p>Pasamos por tu mercancía con la unidad adecuada a su peso y volumen.</p></li>
+      <li><h3>Traslado con GPS</h3><p>Monitoreo satelital y estatus en tiempo real durante todo el camino.</p></li>
+      <li><h3>Entrega o aduana</h3><p>Entregamos en el destino final. Contamos con permiso y gafete único para ingresar a las principales aduanas del país.</p></li>
+    </ol>
+  </div>
+</section>
+
+<section class="block" id="cobertura">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>Aduanas donde tenemos socios</h2>
+      <p>Contamos con socios comerciales en las principales aduanas del país.</p>
+    </div>
+    <div class="board">
+      <div class="board-head"><b>Destinos</b><span>Toda la República Mexicana</span></div>
+      <div class="boardwrap">
+        <table>
+          <thead><tr><th scope="col">Destino</th><th scope="col" class="hide-s">Tipo</th><th scope="col">Estado</th></tr></thead>
+          <tbody>
+            <tr><td class="dest">Manzanillo</td><td class="hide-s">Puerto</td><td><span class="ok">Socio comercial</span></td></tr>
+            <tr><td class="dest">Veracruz</td><td class="hide-s">Puerto</td><td><span class="ok">Socio comercial</span></td></tr>
+            <tr><td class="dest">Nuevo Laredo</td><td class="hide-s">Frontera</td><td><span class="ok">Socio comercial</span></td></tr>
+            <tr><td class="dest">Tijuana</td><td class="hide-s">Frontera</td><td><span class="ok">Socio comercial</span></td></tr>
+            <tr><td class="dest">Guadalajara</td><td class="hide-s">Interior</td><td><span class="ok">Socio comercial</span></td></tr>
+            <tr><td class="dest">La Paz, B.C.</td><td class="hide-s">Puerto</td><td><span class="ok">Socio comercial</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <p class="cover-note">¿Tu destino no está en la lista? Llevamos mercancía a cualquier punto de la República.</p>
+  </div>
+</section>
+
+<section class="block alt">
+  <div class="wrap extra">
+    <img src="https://transreynosa.com/img/montacargas.png" alt="Montacargas con monitoreo GPS" loading="lazy">
+    <div class="text">
+      <div class="sec-head" style="margin-bottom:0"><h2>Montacargas en la Ciudad de México</h2></div>
+      <p>Servicio adicional de montacargas con capacidad de 1.5 toneladas y monitoreo GPS para maniobras de carga y descarga.</p>
+      <div><button class="btn btn-dark" type="button" data-svc="Montacargas en CDMX">Cotizar montacargas</button></div>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="cotizar">
+  <div class="wrap quote">
+    <div class="side">
+      <div class="sec-head" style="margin-bottom:0">
+        <h2>Cotiza tu envío</h2>
+        <p>Puedes contactarnos en todo momento.</p>
+      </div>
+      <ul>
+        <li><b>Teléfono 24/7</b><a href="tel:+525544521839">55 4452 1839</a></li>
+        <li><b>Correo</b><a href="mailto:edgardo@transreynosa.com">edgardo@transreynosa.com</a></li>
+      </ul>
+      <div class="agent">
+        <img src="https://transreynosa.com/img/callus.png" alt="" loading="lazy">
+        <p><strong>Atención al cliente 24/7</strong>Te damos estatus de tu mercancía en tiempo real.</p>
+      </div>
+    </div>
+    <form class="qf" id="qf" novalidate>
+      <div>
+        <label for="qFrom">Origen</label>
+        <input id="qFrom" placeholder="Ciudad de recolección">
+      </div>
+      <div>
+        <label for="qTo">Destino</label>
+        <input id="qTo" placeholder="Ciudad o aduana">
+      </div>
+      <div>
+        <label for="qUnit">Servicio</label>
+        <select id="qUnit">
+          <option>Carga ligera (desde 600 kg)</option>
+          <option>Caja seca</option>
+          <option>Entrega en aduana</option>
+          <option>Montacargas en CDMX</option>
+          <option>No sé, recomiéndenme</option>
+        </select>
+      </div>
+      <div>
+        <label for="qWeight">Peso o volumen aproximado</label>
+        <input id="qWeight" placeholder="Ej. 3 tarimas, 1.2 t">
+      </div>
+      <div>
+        <label for="qName">Nombre</label>
+        <input id="qName" autocomplete="name" required>
+      </div>
+      <div>
+        <label for="qPhone">Teléfono</label>
+        <input id="qPhone" type="tel" autocomplete="tel" required>
+      </div>
+      <div class="full">
+        <label for="qMsg">Comentarios</label>
+        <textarea id="qMsg" rows="3" placeholder="Tipo de mercancía, fecha de recolección…"></textarea>
+      </div>
+      <div class="full">
+        <button class="btn btn-red" type="submit" style="width:100%">Enviar cotización por correo</button>
+        <p class="err" id="qErr" role="alert" hidden>Escribe tu nombre y teléfono para poder responderte.</p>
+        <p class="note">Se abre tu correo con la solicitud lista para edgardo@transreynosa.com.</p>
+      </div>
+    </form>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div>
+      <b>Transportes Reynosa</b>
+      <p>Empresa 100% mexicana de logística terrestre y transportación de mercancía.</p>
+    </div>
+    <ul>
+      <li><a href="#flota">Flota</a></li>
+      <li><a href="#cobertura">Cobertura</a></li>
+      <li><a href="#cotizar">Cotizar</a></li>
+    </ul>
+    <ul>
+      <li><a href="tel:+525544521839">55 4452 1839</a></li>
+      <li><a href="mailto:edgardo@transreynosa.com">edgardo@transreynosa.com</a></li>
+    </ul>
+  </div>
+</footer>
+
+<dialog id="changes" aria-labelledby="cT">
+  <div class="dh"><h2 id="cT">Qué mejoramos</h2><button class="x" type="button" data-close aria-label="Cerrar">×</button></div>
+  <div class="db">
+    <ol>
+      <li><b>El botón de WhatsApp funciona</b><span>El sitio actual manda a whatsapp.transreynosa.com, una dirección que no existe. Cada cliente que lo toca se queda sin contacto. Aquí se reemplaza por llamada y cotizador; al darnos su número de WhatsApp, lo conectamos.</span></li>
+      <li><b>Todo el contenido a la vista</b><span>Hoy la información está escondida detrás de cuatro íconos sin texto. Aquí se lee de corrido, en celular y en computadora.</span></li>
+      <li><b>Menú que lleva a algún lado</b><span>Inicio, Servicios, Cobertura y Contacto apuntan a "#0" y el botón "Contáctanos" a "#".</span></li>
+      <li><b>Cotizador</b><span>Origen, destino, servicio y peso en un solo mensaje.</span></li>
+      <li><b>Cobertura clara</b><span>Las 6 aduanas donde tienen socios, presentadas como tablero.</span></li>
+      <li><b>Lista para Google</b><span>El sitio actual no tiene título principal, descripción ni textos alternativos en sus imágenes.</span></li>
+    </ol>
+  </div>
+</dialog>
+
+<script>
+const sel = document.getElementById("qUnit");
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-svc]"); if (!b) return;
+  sel.value = b.dataset.svc;
+  document.getElementById("cotizar").scrollIntoView();
+  setTimeout(() => document.getElementById("qFrom").focus({preventScroll:true}), 400);
+});
+
+document.getElementById("qf").addEventListener("submit", e => {
+  e.preventDefault();
+  const v = id => document.getElementById(id).value.trim();
+  const err = document.getElementById("qErr");
+  if (!v("qName") || !v("qPhone")) { err.hidden = false; return; }
+  err.hidden = true;
+  const body = [
+    "Solicitud de cotización",
+    `Ruta: ${v("qFrom")} a ${v("qTo")}`, `Servicio: ${v("qUnit")}`, `Peso o volumen: ${v("qWeight")}`,
+    `Nombre: ${v("qName")}`, `Teléfono: ${v("qPhone")}`, `Comentarios: ${v("qMsg")}`
+  ].join("\n");
+  location.href = `mailto:edgardo@transreynosa.com?subject=${encodeURIComponent("Cotización: " + v("qFrom") + " a " + v("qTo"))}&body=${encodeURIComponent(body)}`;
+});
+
+const dlg = document.getElementById("changes");
+document.getElementById("openChanges").addEventListener("click", () => dlg.showModal());
+document.querySelector("[data-close]").addEventListener("click", () => dlg.close());
+dlg.addEventListener("click", e => { if (e.target === dlg) dlg.close(); });
+</script>
+</body>
+</html>
